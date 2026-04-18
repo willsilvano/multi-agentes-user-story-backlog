@@ -46,3 +46,28 @@ def save_pipeline_run(user_story: str, agente_01_resultado: dict) -> int:
         row_id = result.scalar()
         print(f"✅ Pipeline run salvo no PostgreSQL (id: {row_id})")
         return row_id
+
+
+def update_pipeline_run(run_id: int, **kwargs) -> None:
+    """Atualiza colunas de um pipeline_run existente.
+
+    Args:
+        run_id: ID do registro a atualizar.
+        **kwargs: Colunas a atualizar (ex: agente_02_resultado=dict).
+    """
+    if not kwargs:
+        return
+
+    engine = get_engine()
+    set_clauses = ", ".join(f"{col} = :{col}" for col in kwargs)
+    params = {col: json.dumps(val, ensure_ascii=False) if isinstance(val, dict) else val for col, val in kwargs.items()}
+    params["run_id"] = run_id
+    params["now"] = datetime.now()
+
+    with engine.connect() as conn:
+        conn.execute(
+            text(f"UPDATE pipeline_runs SET {set_clauses}, updated_at = :now WHERE id = :run_id"),
+            params,
+        )
+        conn.commit()
+        print(f"  ✅ Pipeline run atualizado no PostgreSQL (id: {run_id})")

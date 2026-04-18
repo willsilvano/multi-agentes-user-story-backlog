@@ -76,3 +76,37 @@ def save_to_qdrant(data: dict, source: str, run_id: int) -> None:
         ],
     )
     print(f"  ✅ Embedding salvo no Qdrant (source: {source}, id: {run_id})")
+
+
+def search_qdrant(query: str, limit: int = 5) -> list[dict]:
+    """Busca semântica no Qdrant pelo backlog do Agente 01.
+
+    Args:
+        query: Texto para busca semântica (ex: 'quais tasks envolvem autenticação?').
+        limit: Número máximo de resultados.
+
+    Returns:
+        Lista de dicts com os resultados encontrados.
+    """
+    client = get_qdrant_client()
+    model = _get_embedding_model()
+
+    create_collection_if_not_exists()
+
+    vector = model.encode(query).tolist()
+
+    results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=vector,
+        limit=limit,
+    )
+
+    return [
+        {
+            "score": point.score,
+            "source": point.payload.get("source", ""),
+            "data": point.payload.get("data", {}),
+            "run_id": point.payload.get("run_id"),
+        }
+        for point in results.points
+    ]

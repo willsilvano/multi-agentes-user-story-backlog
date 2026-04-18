@@ -8,7 +8,7 @@ class AgentPipeline:
     """
     Orquestra a execução dos 3 agentes em sequência:
     1. Scrum Master: quebra história em tarefas
-    2. Analista de Requisitos: identifica requisitos e dependências
+    2. Requisitos Ocultos: descobre riscos e dependências
     3. Auditor: valida qualidade
     """
 
@@ -31,18 +31,19 @@ class AgentPipeline:
 
         # Etapa 1: Scrum Master
         print("\n📋 Agente 01 - Scrum Master")
-        tasks = self.scrum_agent.run(user_story)
+        backlog = self.scrum_agent.run(user_story)
+        run_id = backlog.pop("_run_id")
 
-        # Etapa 2: Analista de Requisitos
-        # print("\n📝 Agente 02 - Analista de Requisitos")
-        # requirements = self.requirements_agent.run(tasks)
+        # Etapa 2: Requisitos Ocultos (entrada via Qdrant)
+        print("\n🔍 Agente 02 - Requisitos Ocultos")
+        requirements = self.requirements_agent.run(user_story, run_id)
 
         # Etapa 3: Auditor
         # print("\n✅ Agente 03 - Auditor de Qualidade")
-        # audit_result = self.audit_agent.run(requirements, tasks)
+        # audit_result = self.audit_agent.run(requirements, backlog)
 
         return {
-            "tasks": tasks,
-            # "requirements": requirements,
+            "backlog": backlog,
+            "requirements": requirements,
             # "audit": audit_result,
         }

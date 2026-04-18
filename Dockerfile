@@ -2,6 +2,8 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
+ENV PYTHONPATH=/app
+
 # Instalar dependências do sistema para psycopg2
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libpq-dev && \
@@ -19,4 +21,4 @@ RUN uv sync --frozen --no-dev
 # Copiar código da aplicação
 COPY . .
 
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "python", "-m", "src.main"]

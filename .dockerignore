@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Virtual environments
+.venv
+venv
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.mypy_cache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# Docs
+LICENSE
+README.md
+*.md
+
+# Lock não necessário no build (já copiado explicitamente)
+# uv.lock

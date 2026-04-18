@@ -1,19 +1,24 @@
-# Agente 02 - Analista de Requisitos
+# Agente 02 — Descoberta de Requisitos Ocultos
 
 ## O que faz
-Identifica requisitos funcionais, não-funcionais e dependências entre componentes.
+Descobre requisitos ocultos que o Agente 01 não cobriu.
 
 ## Input
-- Tarefas técnicas do Agente 01
-- Contexto do projeto
+- User Story original
+- Backlog do Agente 01 (via busca semântica no Qdrant)
 
 ## Output
-- Requisitos funcionais
+- Casos de borda
+- Dependências não declaradas
+- Riscos de segurança (OWASP)
 - Requisitos não-funcionais
-- Mapa de dependências
-- Riscos identificados
+- Gaps de especificação
 
-## Tools utilizadas
-- `exa`: Busca informações externas
-- `find_edges`: Identifica dependências entre requisitos
-- `qdrant`: Busca em base de conhecimento vetorial
+## Tools
+- `search_exa`: Busca artigos e referências técnicas
+- `find_edge_cases`: Identifica cenários de borda
+- `search_qdrant`: Busca semântica no backlog do Agente 01
+
+## Memória
+- **Short-term**: Recebe resumo do backlog via orquestrador
+- **Long-term (Qdrant)**: Busca semanticamente o backlog completo

@@ -39,40 +39,53 @@ flowchart TD
 ## Estrutura do Projeto
 
 ```
-├── docker-compose.yml        # PostgreSQL + Qdrant + App
-├── Dockerfile
-├── init.sql                  # Schema inicial do banco
-├── pyproject.toml
-├── .env.example
+├── .dockerignore             # Arquivos ignorados no build Docker
+├── .env.example              # Template de variáveis de ambiente
+├── .gitignore                # Arquivos ignorados pelo Git
+├── .python-version           # Versão do Python (3.13)
+├── docker-compose.yml        # Orquestração: PostgreSQL + Qdrant + App
+├── Dockerfile                # Imagem da aplicação Python
+├── init.sql                  # Schema inicial do banco de dados
+├── LICENSE                   # Licença do projeto
+├── pyproject.toml            # Dependências e config do projeto (uv)
+├── README.md                 # Este arquivo
+├── uv.lock                   # Lock de dependências
 │
 └── src/
-    ├── main.py               # Ponto de entrada
-    ├── utils.py              # Código compartilhado (extract_json, genai client)
+    ├── __init__.py            # Marca src como pacote Python
+    ├── main.py                # Ponto de entrada do pipeline
+    ├── utils.py               # Código compartilhado (extract_json, genai client)
+    ├── README.md              # Documentação interna do src
     │
-    ├── agente_01_scrum/      # Scrum Master
-    │   ├── agent.py
-    │   ├── tools.py          # search_exa, break_tasks, prioritize
-    │   ├── prompts.py
-    │   └── README.md
+    ├── agente_01_scrum/       # 📋 Scrum Master
+    │   ├── __init__.py        # Exporta ScrumAgent
+    │   ├── agent.py           # Lógica do agente (automatic function calling)
+    │   ├── tools.py           # search_exa, break_tasks, prioritize
+    │   ├── prompts.py         # System prompt + formato de saída JSON
+    │   └── README.md          # Docs do agente
     │
-    ├── agente_02_requisitos/ # Requisitos Ocultos
-    │   ├── agent.py
-    │   ├── tools.py          # search_exa, find_edge_cases, search_qdrant
-    │   ├── prompts.py
-    │   └── README.md
+    ├── agente_02_requisitos/  # 🔍 Requisitos Ocultos
+    │   ├── __init__.py        # Exporta RequirementsAgent
+    │   ├── agent.py           # Lógica do agente (entrada via Qdrant)
+    │   ├── tools.py           # search_exa, find_edge_cases, search_qdrant
+    │   ├── prompts.py         # System prompt + formato de saída JSON
+    │   └── README.md          # Docs do agente
     │
-    ├── agente_03_auditoria/  # Auditoria
-    │   ├── agent.py
-    │   ├── tools.py          # audit_reqs, search_qdrant, score_quality
-    │   ├── prompts.py
-    │   └── README.md
+    ├── agente_03_auditoria/   # ✅ Auditoria
+    │   ├── __init__.py        # Exporta AuditAgent
+    │   ├── agent.py           # Lógica do agente (cruza Agente 01 + 02 via Qdrant)
+    │   ├── tools.py           # audit_reqs, search_qdrant, score_quality
+    │   ├── prompts.py         # System prompt + formato de saída JSON
+    │   └── README.md          # Docs do agente
     │
-    ├── memory/
-    │   ├── db.py             # PostgreSQL (save/update pipeline_runs)
-    │   └── qdrant_client.py  # Qdrant (save/search embeddings)
+    ├── memory/                # 💾 Camada de persistência
+    │   ├── __init__.py        # Exporta funções de db e qdrant
+    │   ├── db.py              # PostgreSQL (save/update pipeline_runs)
+    │   └── qdrant_client.py   # Qdrant (save/search embeddings)
     │
-    └── orchestrator/
-        └── pipeline.py       # Conecta os 3 agentes em sequência
+    └── orchestrator/          # 🚀 Orquestrador
+        ├── __init__.py        # Exporta AgentPipeline
+        └── pipeline.py        # Conecta os 3 agentes em sequência
 ```
 
 ## Pré-requisitos

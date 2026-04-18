@@ -1,0 +1,143 @@
+# Multi-Agentes Python
+
+Sistema multi-agente que transforma user stories em backlog técnico completo usando LLMs (Gemini), busca semântica (Qdrant) e persistência relacional (PostgreSQL).
+
+## Arquitetura
+
+```
+User Story
+    ↓
+┌─────────────────────────────────────────┐
+│  Agente 01 — Scrum Master               │
+│  Reescreve a story, extrai critérios,   │
+│  quebra em tasks e prioriza com RICE     │
+│  Tools: search_exa, break_tasks,        │
+│         prioritize                       │
+│  Salva: PostgreSQL + Qdrant             │
+└─────────────────────────────────────────┘
+    ↓ (Qdrant: busca semântica)
+┌─────────────────────────────────────────┐
+│  Agente 02 — Requisitos Ocultos         │
+│  Descobre casos de borda, riscos,       │
+│  dependências e gaps de especificação   │
+│  Tools: search_exa, find_edge_cases,    │
+│         search_qdrant                    │
+│  Salva: PostgreSQL + Qdrant             │
+└─────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────┐
+│  Agente 03 — Auditor (em desenvolvimento)│
+└─────────────────────────────────────────┘
+    ↓
+Resultado Final (JSON)
+```
+
+## Estrutura do Projeto
+
+```
+├── docker-compose.yml        # PostgreSQL + Qdrant + App
+├── Dockerfile
+├── init.sql                  # Schema inicial do banco
+├── pyproject.toml
+├── .env.example
+│
+└── src/
+    ├── main.py               # Ponto de entrada
+    ├── utils.py              # Código compartilhado (extract_json, genai client)
+    │
+    ├── agente_01_scrum/      # Scrum Master
+    │   ├── agent.py
+    │   ├── tools.py          # search_exa, break_tasks, prioritize
+    │   ├── prompts.py
+    │   └── README.md
+    │
+    ├── agente_02_requisitos/ # Requisitos Ocultos
+    │   ├── agent.py
+    │   ├── tools.py          # search_exa, find_edge_cases, search_qdrant
+    │   ├── prompts.py
+    │   └── README.md
+    │
+    ├── agente_03_auditoria/  # Auditor (em desenvolvimento)
+    │   ├── agent.py
+    │   ├── tools.py
+    │   ├── prompts.py
+    │   └── README.md
+    │
+    ├── memory/
+    │   ├── db.py             # PostgreSQL (save/update pipeline_runs)
+    │   └── qdrant_client.py  # Qdrant (save/search embeddings)
+    │
+    └── orchestrator/
+        └── pipeline.py       # Conecta os agentes em sequência
+```
+
+## Pré-requisitos
+
+- Docker e Docker Compose
+- Chave da API Gemini — [Google AI Studio](https://aistudio.google.com/apikey)
+- Chave da API Exa — [Exa](https://exa.ai)
+
+## Setup
+
+1. Clone o repositório e copie o `.env`:
+
+```bash
+cp .env.example .env
+```
+
+2. Preencha as chaves no `.env`:
+
+```
+GEMINI_API_KEY=sua_chave_gemini
+EXA_API_KEY=sua_chave_exa
+```
+
+3. Suba os containers:
+
+```bash
+docker compose up -d
+```
+
+4. Execute o pipeline:
+
+```bash
+docker compose run --rm app uv run python -m src.main
+```
+
+## Stack
+
+| Componente | Tecnologia |
+|---|---|
+| LLM | Gemini 2.5 Flash (Google GenAI SDK) |
+| Busca externa | Exa API |
+| Banco vetorial | Qdrant |
+| Embeddings | all-MiniLM-L6-v2 (sentence-transformers) |
+| Banco relacional | PostgreSQL 17 |
+| ORM | SQLAlchemy |
+| Gerenciador de deps | uv |
+| Runtime | Python 3.13 |
+
+## Banco de Dados
+
+A tabela `pipeline_runs` armazena o resultado de cada execução:
+
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| `user_story` | TEXT | Story original informada |
+| `agente_01_resultado` | JSONB | Backlog com tasks, RICE, critérios |
+| `agente_02_resultado` | JSONB | Riscos, edge cases, dependências |
+| `agente_03_resultado` | JSONB | *(em desenvolvimento)* |
+
+## Variáveis de Ambiente
+
+| Variável | Descrição |
+|---|---|
+| `GEMINI_API_KEY` | Chave da API Google Gemini |
+| `EXA_API_KEY` | Chave da API Exa |
+| `POSTGRES_USER` | Usuário do PostgreSQL |
+| `POSTGRES_PASSWORD` | Senha do PostgreSQL |
+| `POSTGRES_DB` | Nome do banco |
+| `DATABASE_URL` | Connection string do PostgreSQL |
+| `QDRANT_HOST` | Host do Qdrant |
+| `QDRANT_PORT` | Porta do Qdrant |
+| `GEMINI_MODEL` | Modelo Gemini (padrão: gemini-2.5-flash) |

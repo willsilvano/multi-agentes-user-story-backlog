@@ -2,54 +2,21 @@
 # Entrada: busca semântica no Qdrant (backlog do Agente 01)
 # Saída: riscos, casos de borda, dependências
 
-import json
-import os
-import re
-
-from google import genai
 from google.genai import types
 
 from .prompts import SYSTEM_PROMPT
 from .tools import search_exa, find_edge_cases, search_qdrant
+from src.utils import extract_json, get_genai_client, DEFAULT_MODEL
 from src.memory.db import update_pipeline_run
 from src.memory.qdrant_client import save_to_qdrant
-
-
-def _extract_json(text: str) -> dict:
-    """Extrai JSON de uma resposta que pode conter markdown ou texto extra."""
-    if not text:
-        raise ValueError("Resposta vazia do modelo")
-
-    text = text.strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    match = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(1).strip())
-        except json.JSONDecodeError:
-            pass
-
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError:
-            pass
-
-    raise ValueError(f"Não foi possível extrair JSON da resposta:\n{text[:500]}")
 
 
 class RequirementsAgent:
     """Agente que descobre requisitos ocultos a partir do backlog do Agente 01."""
 
-    def __init__(self, model: str = "gemini-2.5-flash"):
+    def __init__(self, model: str = DEFAULT_MODEL):
         self.model = model
-        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-        self.client = genai.Client(api_key=api_key)
+        self.client = get_genai_client()
 
     def run(self, user_story: str, run_id: int) -> dict:
         """
@@ -77,7 +44,7 @@ class RequirementsAgent:
         )
 
         print(f"  📨 Resposta recebida ({len(response.text or '')} chars)")
-        result = _extract_json(response.text)
+        result = extract_json(response.text)
 
         # Salvar no PostgreSQL
         update_pipeline_run(run_id, agente_02_resultado=result)
@@ -85,5 +52,5 @@ class RequirementsAgent:
 
         # Salvar embedding no Qdrant
         save_to_qdrant(result, source="agente_02_requisitos", run_id=run_id + 100000)
-        
+
         return result

@@ -24,12 +24,17 @@ User Story
 │         search_qdrant                    │
 │  Salva: PostgreSQL + Qdrant             │
 └─────────────────────────────────────────┘
-    ↓
+    ↓ (Qdrant: busca semântica)
 ┌─────────────────────────────────────────┐
-│  Agente 03 — Auditor (em desenvolvimento)│
+│  Agente 03 — Auditoria                  │
+│  Audita completude, consistência,       │
+│  cobertura de riscos e testabilidade    │
+│  Tools: audit_reqs, search_qdrant,      │
+│         score_quality                    │
+│  Salva: PostgreSQL + Qdrant             │
 └─────────────────────────────────────────┘
     ↓
-Resultado Final (JSON)
+Relatório Final (Backlog + Riscos + Score + Sugestões)
 ```
 
 ## Estrutura do Projeto
@@ -57,9 +62,9 @@ Resultado Final (JSON)
     │   ├── prompts.py
     │   └── README.md
     │
-    ├── agente_03_auditoria/  # Auditor (em desenvolvimento)
+    ├── agente_03_auditoria/  # Auditoria
     │   ├── agent.py
-    │   ├── tools.py
+    │   ├── tools.py          # audit_reqs, search_qdrant, score_quality
     │   ├── prompts.py
     │   └── README.md
     │
@@ -68,7 +73,7 @@ Resultado Final (JSON)
     │   └── qdrant_client.py  # Qdrant (save/search embeddings)
     │
     └── orchestrator/
-        └── pipeline.py       # Conecta os agentes em sequência
+        └── pipeline.py       # Conecta os 3 agentes em sequência
 ```
 
 ## Pré-requisitos
@@ -104,6 +109,14 @@ docker compose up -d
 docker compose run --rm app uv run python -m src.main
 ```
 
+## Pipeline
+
+| Etapa | Agente | Input | Output |
+|---|---|---|---|
+| 1 | Scrum Master | User Story | Backlog priorizado (RICE) + critérios de aceitação |
+| 2 | Requisitos Ocultos | User Story + Qdrant (backlog) | Casos de borda, riscos, dependências, gaps |
+| 3 | Auditoria | User Story + Qdrant (backlog + requisitos) | Scores de qualidade, gaps, sugestões, relatório |
+
 ## Stack
 
 | Componente | Tecnologia |
@@ -126,7 +139,7 @@ A tabela `pipeline_runs` armazena o resultado de cada execução:
 | `user_story` | TEXT | Story original informada |
 | `agente_01_resultado` | JSONB | Backlog com tasks, RICE, critérios |
 | `agente_02_resultado` | JSONB | Riscos, edge cases, dependências |
-| `agente_03_resultado` | JSONB | *(em desenvolvimento)* |
+| `agente_03_resultado` | JSONB | Scores, gaps, sugestões, relatório |
 
 ## Variáveis de Ambiente
 
@@ -134,10 +147,10 @@ A tabela `pipeline_runs` armazena o resultado de cada execução:
 |---|---|
 | `GEMINI_API_KEY` | Chave da API Google Gemini |
 | `EXA_API_KEY` | Chave da API Exa |
+| `GEMINI_MODEL` | Modelo Gemini (padrão: gemini-2.5-flash) |
 | `POSTGRES_USER` | Usuário do PostgreSQL |
 | `POSTGRES_PASSWORD` | Senha do PostgreSQL |
 | `POSTGRES_DB` | Nome do banco |
 | `DATABASE_URL` | Connection string do PostgreSQL |
 | `QDRANT_HOST` | Host do Qdrant |
 | `QDRANT_PORT` | Porta do Qdrant |
-| `GEMINI_MODEL` | Modelo Gemini (padrão: gemini-2.5-flash) |

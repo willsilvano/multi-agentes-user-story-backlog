@@ -1,4 +1,4 @@
-# Multi-Agentes Python
+# Multi-Agentes User Story Backlogs
 
 Sistema multi-agente que transforma user stories em backlog técnico completo usando LLMs (Gemini), busca semântica (Qdrant) e persistência relacional (PostgreSQL).
 

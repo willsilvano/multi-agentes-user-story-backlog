@@ -4,37 +4,36 @@ Sistema multi-agente que transforma user stories em backlog técnico completo us
 
 ## Arquitetura
 
-```
-User Story
-    ↓
-┌─────────────────────────────────────────┐
-│  Agente 01 — Scrum Master               │
-│  Reescreve a story, extrai critérios,   │
-│  quebra em tasks e prioriza com RICE     │
-│  Tools: search_exa, break_tasks,        │
-│         prioritize                       │
-│  Salva: PostgreSQL + Qdrant             │
-└─────────────────────────────────────────┘
-    ↓ (Qdrant: busca semântica)
-┌─────────────────────────────────────────┐
-│  Agente 02 — Requisitos Ocultos         │
-│  Descobre casos de borda, riscos,       │
-│  dependências e gaps de especificação   │
-│  Tools: search_exa, find_edge_cases,    │
-│         search_qdrant                    │
-│  Salva: PostgreSQL + Qdrant             │
-└─────────────────────────────────────────┘
-    ↓ (Qdrant: busca semântica)
-┌─────────────────────────────────────────┐
-│  Agente 03 — Auditoria                  │
-│  Audita completude, consistência,       │
-│  cobertura de riscos e testabilidade    │
-│  Tools: audit_reqs, search_qdrant,      │
-│         score_quality                    │
-│  Salva: PostgreSQL + Qdrant             │
-└─────────────────────────────────────────┘
-    ↓
-Relatório Final (Backlog + Riscos + Score + Sugestões)
+```mermaid
+flowchart TD
+    US["📝 User Story"] --> A1
+
+    subgraph A1["📋 Agente 01 — Scrum Master"]
+        A1T["Tools: search_exa, break_tasks, prioritize"]
+    end
+
+    A1 -->|PostgreSQL + Qdrant| DB[(🐘 PostgreSQL)]
+    A1 -->|embedding| QD[(🔮 Qdrant)]
+
+    QD -->|busca semântica| A2
+
+    subgraph A2["🔍 Agente 02 — Requisitos Ocultos"]
+        A2T["Tools: search_exa, find_edge_cases, search_qdrant"]
+    end
+
+    A2 -->|atualiza| DB
+    A2 -->|embedding| QD
+
+    QD -->|busca semântica| A3
+
+    subgraph A3["✅ Agente 03 — Auditoria"]
+        A3T["Tools: audit_reqs, search_qdrant, score_quality"]
+    end
+
+    A3 -->|atualiza| DB
+    A3 -->|embedding| QD
+
+    A3 --> RF["📊 Relatório Final<br/>Backlog + Riscos + Score + Sugestões"]
 ```
 
 ## Estrutura do Projeto

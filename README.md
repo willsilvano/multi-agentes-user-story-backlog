@@ -110,11 +110,11 @@ docker compose run --rm app uv run python -m src.main
 
 ## Pipeline
 
-| Etapa | Agente | Input | Output |
-|---|---|---|---|
-| 1 | Scrum Master | User Story | Backlog priorizado (RICE) + critérios de aceitação |
-| 2 | Requisitos Ocultos | User Story + Qdrant (backlog) | Casos de borda, riscos, dependências, gaps |
-| 3 | Auditoria | User Story + Qdrant (backlog + requisitos) | Scores de qualidade, gaps, sugestões, relatório |
+| Etapa | Agente | Input | Output | Docs |
+|---|---|---|---|---|
+| 1 | Scrum Master | User Story | Backlog priorizado (RICE) + critérios de aceitação | [README](src/agente_01_scrum/README.md) |
+| 2 | Requisitos Ocultos | User Story + Qdrant (backlog) | Casos de borda, riscos, dependências, gaps | [README](src/agente_02_requisitos/README.md) |
+| 3 | Auditoria | User Story + Qdrant (backlog + requisitos) | Scores de qualidade, gaps, sugestões, relatório | [README](src/agente_03_auditoria/README.md) |
 
 ## Stack
 
